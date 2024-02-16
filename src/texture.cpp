@@ -29,26 +29,50 @@ namespace CGL {
   Color Texture::sample_nearest(Vector2D uv, int level) {
     // TODO: Task 5: Fill this in.
     auto& mip = mipmap[level];
-
+    uv[0] *= width;
+    uv[1] *= height;
+    return mip.get_texel(floor(uv[0]), floor(uv[1]));
 
 
 
     // return magenta for invalid level
-    return Color(1, 0, 1);
+    //return Color(1, 0, 1);
   }
 
   Color Texture::sample_bilinear(Vector2D uv, int level) {
     // TODO: Task 5: Fill this in.
     auto& mip = mipmap[level];
 
+    double u = uv[0] * width;
+    double v = uv[1] * height;
 
 
+    // find the center points
+    float center_u = round(u);
+    float center_v = round(v);
 
+    // get the four texel
+    Color u00 = mip.get_texel(center_u - 1, center_v);
+    Color u10 = mip.get_texel(center_u, center_v);
+    Color u01 = mip.get_texel(center_u - 1, center_v - 1);
+    Color u11 = mip.get_texel(center_u, center_v - 1);
+
+    // calcualte s, t
+    double s = u - center_u - 0.5;
+    double t = (center_v + 0.5) - v;
+
+    // 1D interpolation
+    Color u0 = linear_interpolate(s, u00, u10);
+    Color u1 = linear_interpolate(s, u01, u11);
+    
+    return linear_interpolate(t, u0, u1);
     // return magenta for invalid level
-    return Color(1, 0, 1);
+    //return Color(1, 0, 1);
   }
 
-
+  Color Texture::linear_interpolate(float x, Color v0, Color v1) {
+      return x * v1 + (1-x) * v0;
+  }
 
   /****************************************************************************/
 

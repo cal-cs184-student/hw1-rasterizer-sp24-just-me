@@ -8,6 +8,7 @@
 #include "texture.h"
 #include <ctime>
 #include "rasterizer.h"
+#include <chrono>
 
 using namespace std;
 
@@ -304,7 +305,11 @@ void DrawRend::redraw() {
   software_rasterizer->clear_buffers();
 
   SVG& svg = *svgs[current_svg];
+  auto start = std::chrono::high_resolution_clock::now();
   svg.draw(software_rasterizer, ndc_to_screen * svg_to_ndc[current_svg]);
+  auto end = std::chrono::high_resolution_clock::now();
+  auto elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+  std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
 
   // draw canvas outline
   Vector2D a = ndc_to_screen * svg_to_ndc[current_svg] * (Vector2D(0, 0)); a.x--; a.y++;
