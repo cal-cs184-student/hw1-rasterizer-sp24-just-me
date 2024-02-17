@@ -8,18 +8,49 @@ namespace CGL {
 
   Color Texture::sample(const SampleParams& sp) {
     // TODO: Task 6: Fill this in.
+    Color color;
+    float D = get_level(sp);
+    int level = round(D);
+    if (sp.lsm != L_LINEAR) {
+        if (sp.psm == P_NEAREST) {
+            color = sample_nearest(sp.p_uv, level);
+        }
+        else {
+            color = sample_bilinear(sp.p_uv, level);
+        }
+    }
+
+    
+    else {
+        color = sample_nearest(sp.p_uv, level);
+        double x = D - floor(D);
+        if (sp.psm == P_NEAREST) {
+            Color next = sample_nearest(sp.p_uv, level + 1);
+            color =  color + x * (next + (-1) * color);
+        }
+        else {  // trilinear
+            Color next = sample_bilinear(sp.p_uv, level + 1);
+            color = color + x * (next + (-1) * color);
+        }
+
+    }
+    return color;
 
 
-// return magenta for invalid level
-    return Color(1, 0, 1);
   }
 
   float Texture::get_level(const SampleParams& sp) {
     // TODO: Task 6: Fill this in.
-
-
-
-    return 0;
+    if (sp.lsm == L_ZERO) {
+        return 0;
+    }
+    Vector2D dx = width * (sp.p_dx_uv - sp.p_uv);
+    Vector2D dy = height * (sp.p_dy_uv - sp.p_uv);
+    float level = max(sqrt(pow(dx.x, 2) + pow(dx.y, 2)), sqrt(pow(dy.x, 2) + pow(dy.y, 2)));
+    float D = log2(level);
+    return D;
+    
+    
   }
 
   Color MipLevel::get_texel(int tx, int ty) {
@@ -28,9 +59,14 @@ namespace CGL {
 
   Color Texture::sample_nearest(Vector2D uv, int level) {
     // TODO: Task 5: Fill this in.
+      
+    if (level >= mipmap.size()) {
+        level--;
+    }
     auto& mip = mipmap[level];
-    uv[0] *= width;
-    uv[1] *= height;
+    
+    uv[0] *= mip.width;
+    uv[1] *= mip.height;
     return mip.get_texel(floor(uv[0]), floor(uv[1]));
 
 
@@ -41,10 +77,13 @@ namespace CGL {
 
   Color Texture::sample_bilinear(Vector2D uv, int level) {
     // TODO: Task 5: Fill this in.
+    if (level >= mipmap.size()) {
+        level--;
+    }
     auto& mip = mipmap[level];
 
-    double u = uv[0] * width;
-    double v = uv[1] * height;
+    double u = uv[0] * mip.width;
+    double v = uv[1] * mip.height;
 
 
     // find the center points
@@ -58,8 +97,20 @@ namespace CGL {
     Color u11 = mip.get_texel(center_u, center_v - 1);
 
     // calcualte s, t
-    double s = u - center_u - 0.5;
-    double t = (center_v + 0.5) - v;
+    double s;
+    double t;
+    if (u < center_u) {
+        s = 0.5 - (center_u - u);
+    }
+    else {
+        s = u - center_u + 0.5;
+    }
+    if (v < center_v) {
+        t = 0.5 + center_v - v;
+    }
+    else {
+        t = 0.5 - (v - center_v);
+    }
 
     // 1D interpolation
     Color u0 = linear_interpolate(s, u00, u10);

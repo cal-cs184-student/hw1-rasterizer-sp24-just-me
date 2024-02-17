@@ -114,6 +114,10 @@ namespace CGL {
       float x2, float y2, float u2, float v2,
       Texture& tex);
 
+    Vector2D RasterizerImp::get_barycentric_coord(float x0, float y0, float u0, float v0,
+        float x1, float y1, float u1, float v1,
+        float x2, float y2, float u2, float v2, float sample_x, float sample_y);
+
     unsigned int get_sample_rate() { return sample_rate; }
 
     void set_sample_rate(unsigned int rate);

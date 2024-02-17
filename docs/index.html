@@ -1,6 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
+
 <style>
   body {
     padding: 100px;
@@ -22,6 +23,7 @@
 
 
 <body>
+  <a href = "https://cal-cs184-student.github.io/hw-webpages-sp24-937204197/hw1/index.html"> Link to the webpage </a>
 
 <h1 align="middle">CS 184/284A: Computer Graphics and Imaging, Spring 2024</h1>
 <h1 align="middle">Homework 1: Rasterizer</h1>
@@ -42,7 +44,7 @@
   <br><br> My algorithm is no worse than one that checks each sample within the bounding box of the triangle because this is exactly what I did.
   <br><br> Below is the screenshot:
 </p>
-<img src = "C:\CS 184\hw1-rasterizer-sp24-just-me\docs\images\task1.png">
+<img src = ".\images\task1.png">
 <p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
 
 
@@ -62,15 +64,15 @@
     <table style="width=100%">
       <tr>
         <td>
-          <img src="images/task2-1.png" align="middle" width="300px"/>
+          <img src=".\images/task2-1.png" align="middle" width="300px"/>
           <figcaption align="middle">Sample Rate 1</figcaption>
         </td>
         <td>
-          <img src="images/task2-2.png" align="middle" width="300px"/>
+          <img src=".\images/task2-2.png" align="middle" width="300px"/>
           <figcaption align="middle">Sample Rate 4</figcaption>
         </td>
         <td>
-          <img src="images/task2-4.png" align="middle" width="300px"/>
+          <img src=".\images/task2-4.png" align="middle" width="300px"/>
           <figcaption align="middle">Sample Rate 16</figcaption>
         </td>
       </tr>
@@ -87,18 +89,18 @@
   <p>The cube man kicks his head away~
 
   </p>
-  <img src="images/task3.png" align="middle" width="400px"/>
+  <img src=".\images/task3.png" align="middle" width="400px"/>
 
 <h2 align="middle">Section II: Sampling</h2>
 
 <h3 align="middle">Part 4: Barycentric coordinates</h3>
-<img src="images/task4-1.png" align="middle" width="400px"/>
+<img src=".\images/task4-1.png" align="middle" width="400px"/>
 <p>
  
   Barycentric coordinates describe the position relative to the three vertices of a triangle. The closer a point is to a vertex, the higher the component of that vertex is weighted. For example, in the above picture, the closer a point is to a vertex, the closer its color is to the color of the vertex.
   <br><br> Below is the screenshot of basic test 7
 </p>
-<img src="images/task4.png" align="middle" width="400px"/>
+<img src=".\images/task4.png" align="middle" width="400px"/>
 
 <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
 
@@ -112,22 +114,22 @@
   <table style="width=100%">
     <tr>
       <td>
-        <img src="images/task5-bilinear-1.png" align="middle" width="400px"/>
+        <img src=".\images/task5.png" align="middle" width="400px"/>
         <figcaption align="middle">bilinear sample rate 1</figcaption>
       </td>
       <td>
-        <img src="images/task5-bilinear-16.png" align="middle" width="400px"/>
+        <img src=".\images/task5-bilinear-16.png" align="middle" width="400px"/>
         <figcaption align="middle">bilinear sample rate 16</figcaption>
       </td>
     </tr>
     <br>
     <tr>
       <td>
-        <img src="images/task5-nearest-1.png" align="middle" width="400px"/>
+        <img src=".\images/task5-nearest-1.png" align="middle" width="400px"/>
         <figcaption align="middle">nearest sample rate 1</figcaption>
       </td>
       <td>
-        <img src="images/task5-nearest-16.png" align="middle" width="400px"/>
+        <img src=".\images/task5-nearest-16.png" align="middle" width="400px"/>
         <figcaption align="middle">nearest sample rate 16</figcaption>
       </td>
     </tr>
@@ -135,14 +137,51 @@
 </div>
 
 <p>
-  Comment on the relative differences. Discuss when there will be a large difference between the two methods and why
+  
 
-  For sample rate at 1, the image with nearest method is more granular while the image with bilinear method is more blur. For sample rate at 16, there is no obvious difference. 
+  For sample rate at 1, the image with nearest method is more granular while the image with bilinear method is more blur. For sample rate at 16, there is no obvious difference(minor difference in some pixels). 
   In general, there will be a large difference between the two methods when the sampling rate is low and the image frequency is high.
 </p>
 
 <h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
 
+<p>
+  Level mapping is the process of mapping texture into world space with different resultion. To implement, I first Computer
+  the mipmap level D using the same method as in lecture. Then depending on the LevelSampleMethod, I retrive the color from the approate level
+  of the mipmap and use this color to fill the corresponding sample buffer.
+  <br><br>
+  For zeroth and nearest method, the time and space complexity is lower than that of the linear method because linear method needs to read more 
+  pixles and do more operations. However, because the linear method averages out texture pixels, it has a better antialising effect.
+  The pictures below demenstrate the difference.
+</p>
+
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src=".\images/task6-1.png" align="middle" width="400px"/>
+        <figcaption align="middle">L_ZERO and P_NEAREST</figcaption>
+      </td>
+      <td>
+        <img src=".\images/task6-2.png" align="middle" width="400px"/>
+        <figcaption align="middle">L_ZERO and P_LINEAR</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src=".\images/task6-3.png" align="middle" width="400px"/>
+        <figcaption align="middle">L_LINEAR and P_NEAREST</figcaption>
+      </td>
+      <td>
+        <img src=".\images/task6-4.png" align="middle" width="400px"/>
+        <figcaption align="middle">L_LINEAR and P_LINEAR</figcaption>
+      </td>
+    </tr>
+  </table>
+  <img src=".\images/111.png" align="middle" width="200px"/>
+  <figcaption align="middle">Original Image</figcaption>
+</div>
 
 
 <h2 align="middle">Section III: Art Competition</h2>

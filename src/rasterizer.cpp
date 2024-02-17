@@ -234,37 +234,26 @@ namespace CGL {
                             continue;
                         }
 
-                        // interpolation
-                        // resolve winding
-                        double xA = x0;
-                        double yA = y0;
-                        double xB = x1;
-                        double yB = y1;
-                        double xC = x2;
-                        double yC = y2;
+                        //// find barycentric coordinate
+
+                        Vector2D uv = get_barycentric_coord(x0, y0, u0, v0, x1, y1, u1, v1,
+                            x2, y2, u2, v2, sample_x, sample_y);
+                        Vector2D dx_uv = get_barycentric_coord(x0, y0, u0, v0, x1, y1, u1, v1,
+                            x2, y2, u2, v2, sample_x + 1, sample_y);
+                        Vector2D dy_uv = get_barycentric_coord(x0, y0, u0, v0, x1, y1, u1, v1,
+                            x2, y2, u2, v2, sample_x, sample_y + 1);
+
                         
 
-                        // find barycentric coordinate
-                        double a = (-(sample_x - xB) * (yC - yB) + (sample_y - yB) * (xC - xB)) /
-                            (-(xA - xB) * (yC - yB) + (yA - yB) * (xC - xB));
-                        double b = (-(sample_x - xC) * (yA - yC) + (sample_y - yC) * (xA - xC)) /
-                            (-(xB - xC) * (yA - yC) + (yB - yC) * (xA - xC));
-                        double r = 1 - a - b;
+                        SampleParams sp;
+                        sp.p_uv = uv;
+                        sp.p_dx_uv = dx_uv;
+                        sp.p_dy_uv = dy_uv;
+                        sp.psm = psm;
+                        sp.lsm = lsm;
 
-                        // get u v using the barycentric coordinate
-                        double u, v;
-                        u = a * u0 + b * u1 + r * u2;
-                        v = a * v0 + b * v1 + r * v2;
-                        
-                        Vector2D uv(u, v);
                         Color color;
-                        if (psm == P_NEAREST) {
-                            color = tex.sample_nearest(uv);
-                        }
-                        else {
-                            
-                            color = tex.sample_bilinear(uv);
-                        }
+                        color = tex.sample(sp);
                         //std::cout << "uv: " << uv << std::endl;
                         sample_buffer[sample_rate * ((y * width) + x) + (j * sample_size) * sample_size + (sample_size * i)] = color;
                     }
@@ -274,6 +263,30 @@ namespace CGL {
 
 
 
+    }
+
+    Vector2D RasterizerImp::get_barycentric_coord(float x0, float y0, float u0, float v0,
+        float x1, float y1, float u1, float v1,
+        float x2, float y2, float u2, float v2, float sample_x, float sample_y) {
+
+        // find barycentric coordinate
+        double a = (-(sample_x - x1) * (y2 - y1) + (sample_y - y1) * (x2 - x1)) /
+            (-(x0 - x1) * (y2 - y1) + (y0 - y1) * (x2 - x1));
+        double b = (-(sample_x - x2) * (y0 - y2) + (sample_y - y2) * (x0 - x2)) /
+            (-(x1 - x2) * (y0 - y2) + (y1 - y2) * (x0 - x2));
+        double r = 1 - a - b;
+        // get u v using the barycentric coordinate
+        double u, v;
+        u = a * u0 + b * u1 + r * u2;
+        v = a * v0 + b * v1 + r * v2;
+        
+        // test if the point is inside the triangle
+        if (a < 0 || b < 0 || r < 0) {
+
+        }
+
+        Vector2D uv(u, v);
+        return uv;
     }
 
     void RasterizerImp::set_sample_rate(unsigned int rate) {
